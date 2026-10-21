@@ -1,0 +1,15 @@
+OPENWORD — AJUSTES DE RESPONSIVIDADE
+
+Este pacote inclui reforços de layout para celulares estreitos (a partir de 320 px), celulares maiores, tablets, notebooks, monitores grandes e TVs/monitores ultrawide. Os ajustes tratam de quebra de textos, largura de formulários e cartões, navegação, menus, imagens, prévias de fotos, modais e rolagem em telas baixas ou na horizontal.
+
+COMO ATUALIZAR
+1. Faça uma cópia de segurança do repositório atual.
+2. Extraia este ZIP mantendo a estrutura de pastas.
+3. Substitua os arquivos correspondentes no GitHub, preservando as pastas css e js.
+4. Faça commit/push e aguarde o GitHub Pages publicar.
+5. Abra o site e atualize com Ctrl+F5. Em celular, feche e reabra a página ou limpe o cache se necessário.
+
+OBSERVAÇÃO IMPORTANTE
+O layout foi reforçado por CSS e a sintaxe dos scripts foi verificada. Responsividade absoluta em todos os aparelhos não pode ser garantida sem testar os navegadores e tamanhos reais; telas, zoom, fontes do sistema, extensões e navegadores diferentes podem alterar a apresentação. Teste pelo menos em 320/360 px, 390/430 px, tablet vertical/horizontal, notebook, desktop e TV 1920 px ou superior.
+
+O arquivo firestore.rules continua incluído no pacote, mas alterações de CSS não publicam regras no Firebase. As regras precisam ser publicadas separadamente no console do Firebase quando houver mudanças nelas.
