@@ -1,0 +1,20 @@
+OPENWORD — CORREÇÕES DE PUBLICAÇÃO, VALIDAÇÃO E COMODIDADES
+
+O pacote mantém a estrutura do site e a integração Firebase existente.
+
+Correções:
+- O formulário de publicação agora verifica os campos essenciais antes de tentar salvar e exibe notificações claras para valores ausentes ou inválidos.
+- Campos obrigatórios bloqueados pela validação nativa do navegador também geram uma notificação explicando o que precisa ser corrigido.
+- As comodidades são exclusivas de “Área de Lazer”; para Venda e Aluguel residencial, o bloco fica oculto e as opções não são anexadas ao anúncio.
+- A lista de comodidades de lazer já inclui categorias inspiradas nas categorias públicas de comodidades do Airbnb, incluindo área externa, cozinha, entretenimento, conforto, internet, estacionamento, lavanderia, banheiro, acessibilidade e segurança.
+- Reforços responsivos existentes foram preservados.
+
+PUBLICAÇÃO:
+1. Faça backup dos arquivos atuais.
+2. Extraia este ZIP mantendo index.html, css/, js/ e firestore.rules nos mesmos caminhos.
+3. Envie/substitua os arquivos no repositório do site e publique.
+4. Se houver alterações nas regras do Firestore, publique-as também no Console Firebase. As regras não são atualizadas automaticamente pelo GitHub Pages.
+5. Teste com uma conta autenticada: publicar um anúncio de lazer, depois um de venda e um de aluguel residencial. Confira também em celular.
+
+IMPORTANTE:
+O código passou pela verificação de sintaxe JavaScript (node --check). Isso não substitui um teste real no domínio publicado com a conta Firebase, pois regras, autenticação, quotas e configuração do projeto só podem ser confirmadas no ambiente online.

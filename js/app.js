@@ -1128,6 +1128,50 @@
       return;
     }
 
+    const requiredFields = [
+      ['prop-title', 'Informe o título do anúncio.'],
+      ['prop-address', 'Informe o endereço do imóvel.'],
+      ['prop-number', 'Informe o número do imóvel.'],
+      ['prop-type', 'Selecione a finalidade do anúncio.'],
+      ['prop-price', 'Informe o valor do anúncio.'],
+      ['prop-sun', 'Selecione a posição solar.']
+    ];
+    for (const [fieldId, message] of requiredFields) {
+      const field = document.getElementById(fieldId);
+      if (!field || !String(field.value || '').trim()) {
+        showToast('Campo obrigatório', message, 'fa-triangle-exclamation');
+        field?.focus?.();
+        return;
+      }
+    }
+    const selectedType = document.getElementById('prop-type').value;
+    const lotOptional = document.getElementById('prop-lot-optional')?.checked;
+    const meters = document.getElementById('prop-meters')?.value?.trim();
+    if (!meters && !(selectedType === 'lazer' && lotOptional)) {
+      showToast('Campo obrigatório', 'Informe a metragem do imóvel ou marque a opção de lote não informado, quando aplicável.', 'fa-triangle-exclamation');
+      document.getElementById('prop-meters')?.focus();
+      return;
+    }
+    const roomFields = [
+      ['prop-rooms', 'quartos'],
+      ['prop-livingrooms', 'salas'],
+      ['prop-baths', 'banheiros'],
+      ['prop-kitchens', 'cozinhas']
+    ];
+    for (const [fieldId, label] of roomFields) {
+      if (document.getElementById(fieldId)?.value === '') {
+        showToast('Campo obrigatório', `Selecione a quantidade de ${label}.`, 'fa-triangle-exclamation');
+        document.getElementById(fieldId)?.focus();
+        return;
+      }
+    }
+    const priceNumber = Number(document.getElementById('prop-price').value.trim().replace(/[^0-9,.-]/g, '').replace(',', '.'));
+    if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
+      showToast('Valor inválido', 'Informe um valor numérico maior que zero.', 'fa-triangle-exclamation');
+      document.getElementById('prop-price')?.focus();
+      return;
+    }
+
     if (uploadedPhotos.length === 0) {
       showToast('Fotos Necessárias', 'Adicione pelo menos 1 foto do imóvel para publicar.', 'fa-image');
       return;
@@ -1243,6 +1287,56 @@
   window.checkEmailVerification = checkEmailVerification;
   window.resendEmailVerification = resendEmailVerification;
   window.toggleAuthMode = toggleAuthMode;
+
+
+  // Mostra um aviso legível quando a validação nativa impede o envio do formulário.
+  // O evento "invalid" não borbulha, por isso o listener usa captura.
+  let lastValidationNoticeAt = 0;
+  window.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('invalid', (event) => {
+      const field = event.target;
+      if (!field || !field.form || field.form.id !== 'property-form') return;
+      const now = Date.now();
+      if (now - lastValidationNoticeAt < 1200) return;
+      lastValidationNoticeAt = now;
+      const label = field.id
+        ? document.querySelector(`label[for="${field.id}"]`)?.textContent?.trim()
+        : '';
+      const fieldName = label || field.getAttribute('aria-label') || field.placeholder || 'um campo obrigatório';
+      showToast('Confira os campos', `Preencha ou corrija: ${fieldName.replace('*', '').trim()}.`, 'fa-triangle-exclamation');
+    }, true);
+
+    const propertyForm = document.getElementById('property-form');
+    if (propertyForm) {
+      propertyForm.addEventListener('submit', (event) => {
+        // Evita envio se campos essenciais estiverem ausentes mesmo em navegadores
+        // que não aplicam a validação HTML5 como esperado.
+        const type = document.getElementById('prop-type')?.value;
+        const price = document.getElementById('prop-price')?.value?.trim();
+        const title = document.getElementById('prop-title')?.value?.trim();
+        const address = document.getElementById('prop-address')?.value?.trim();
+        const houseNumber = document.getElementById('prop-number')?.value?.trim();
+        const sun = document.getElementById('prop-sun')?.value?.trim();
+        const lotOptional = document.getElementById('prop-lot-optional')?.checked;
+        const meters = document.getElementById('prop-meters')?.value?.trim();
+        const rooms = ['prop-rooms', 'prop-livingrooms', 'prop-baths', 'prop-kitchens']
+          .map(id => document.getElementById(id)?.value ?? '');
+        let missing = '';
+        if (!title) missing = 'Informe o título do anúncio.';
+        else if (!address) missing = 'Informe o endereço.';
+        else if (!houseNumber) missing = 'Informe o número do imóvel.';
+        else if (!type) missing = 'Selecione a finalidade do anúncio.';
+        else if (!price || Number(price.replace(/[^0-9,.-]/g, '').replace(',', '.')) <= 0) missing = 'Informe um valor válido maior que zero.';
+        else if (!meters && !(type === 'lazer' && lotOptional)) missing = 'Informe a metragem ou marque a opção de lote não informado, quando aplicável.';
+        else if (rooms.some(value => value === '')) missing = 'Selecione a quantidade de quartos, salas, banheiros e cozinhas.';
+        else if (!sun) missing = 'Selecione a posição solar.';
+        if (missing) {
+          event.preventDefault();
+          showToast('Não foi possível publicar', missing, 'fa-triangle-exclamation');
+        }
+      });
+    }
+  });
 
   // Init page; Firebase restores the session and loads cloud content.
   window.addEventListener('DOMContentLoaded', () => {
