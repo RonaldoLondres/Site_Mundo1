@@ -1039,8 +1039,13 @@
   function updateLeisureAmenities() {
     const type = document.getElementById('prop-type')?.value;
     const isLeisure = type === 'lazer';
+    const section = document.getElementById('leisure-amenities-section');
     const wrap = document.getElementById('leisure-amenities-wrap');
-    if (wrap) wrap.classList.toggle('hidden', !isLeisure);
+    if (section) section.style.display = isLeisure ? 'block' : 'none';
+    if (wrap) {
+      wrap.classList.remove('hidden');
+      wrap.style.display = 'block';
+    }
 
     // Área de lazer usa um formulário próprio; os campos residenciais continuam
     // intactos para venda e aluguel.
@@ -1048,7 +1053,10 @@
      'prop-kitchens-field','prop-baths-field','prop-sun-field']
       .forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.toggle('hidden', isLeisure);
+        if (el) {
+          el.classList.toggle('hidden', isLeisure);
+          el.style.display = isLeisure ? 'none' : '';
+        }
       });
 
     const meters = document.getElementById('prop-meters');
@@ -1379,9 +1387,9 @@
         else if (!houseNumber) missing = 'Informe o número do imóvel.';
         else if (!type) missing = 'Selecione a finalidade do anúncio.';
         else if (!price || Number(price.replace(/[^0-9,.-]/g, '').replace(',', '.')) <= 0) missing = 'Informe um valor válido maior que zero.';
-        else if (!meters && !(type === 'lazer' && lotOptional)) missing = 'Informe a metragem ou marque a opção de lote não informado, quando aplicável.';
-        else if (rooms.some(value => value === '')) missing = 'Selecione a quantidade de quartos, salas, banheiros e cozinhas.';
-        else if (!sun) missing = 'Selecione a posição solar.';
+        else if (type !== 'lazer' && !meters && !lotOptional) missing = 'Informe a metragem do imóvel.';
+        else if (type !== 'lazer' && rooms.some(value => value === '')) missing = 'Selecione a quantidade de quartos, salas, banheiros e cozinhas.';
+        else if (type !== 'lazer' && !sun) missing = 'Selecione a posição solar.';
         if (missing) {
           event.preventDefault();
           showToast('Não foi possível publicar', missing, 'fa-triangle-exclamation');

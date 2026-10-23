@@ -1,0 +1,13 @@
+CORREÇÃO DA ÁREA DE LAZER
+
+Nesta versão, Área de Lazer tem um painel próprio na etapa 2 da publicação, separado dos campos residenciais.
+
+Como testar:
+1. Substitua os arquivos do projeto pelos arquivos deste pacote, preservando as pastas css e js.
+2. Publique no GitHub Pages.
+3. Abra o site e use Ctrl+F5.
+4. Comece um anúncio novo e selecione Área de Lazer.
+5. Deve aparecer o painel amarelo “Comodidades da área de lazer”; os campos de lote, quartos, salas, cozinhas, banheiros e posição solar ficam ocultos.
+6. Selecione Venda ou Aluguel residencial para voltar aos campos habituais.
+
+A validação do JavaScript foi verificada localmente. O teste real de gravação/publicação ainda precisa ser feito no site conectado ao Firebase.
