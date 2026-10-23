@@ -102,11 +102,14 @@
           <div>
             <h4 class="font-bold text-white text-xs truncate">${prop.title}</h4>
             <p class="text-[11px] text-slate-400 truncate mt-0.5">${prop.address}</p>
-            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800">
+            <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-800">
               <span class="text-xs font-black" style="color:${cfg.color}">${prop.price}</span>
-              <button onclick="showMainView('#destaque'); setAsFeatured('${prop.id}')" class="text-[10px] text-neon hover:underline font-bold">
-                Ver Destaque <i class="fa-solid fa-arrow-right"></i>
-              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="showMainView('#destaque'); setAsFeatured('${prop.id}')" class="text-[10px] text-neon hover:underline font-bold">
+                  Ver Destaque <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                ${currentUser.isLoggedIn && prop.ownerId === currentUser.uid ? `<button onclick="deleteProperty('${prop.id}')" class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-red-900/70 bg-red-950/50 text-red-300 hover:bg-red-700 hover:text-white text-[10px] font-bold transition" title="Apagar este imóvel"><i class="fa-solid fa-trash"></i> Apagar</button>` : ''}
+              </div>
             </div>
           </div>
         `;
@@ -730,6 +733,22 @@
     document.getElementById('featured-description').textContent = description;
     descWrap.classList.toggle('hidden', !description.trim());
 
+    const amenitiesWrap = document.getElementById('featured-amenities-wrap');
+    const amenitiesList = document.getElementById('featured-amenities-list');
+    const propertyAmenities = Array.isArray(currentFeatured.amenities) ? currentFeatured.amenities : [];
+    amenitiesList.innerHTML = '';
+    propertyAmenities.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 min-w-0';
+      const icon = document.createElement('i');
+      icon.className = 'fa-solid fa-check text-yellow-400 w-4 text-center';
+      const label = document.createElement('span');
+      label.textContent = name;
+      row.append(icon, label);
+      amenitiesList.appendChild(row);
+    });
+    amenitiesWrap.classList.toggle('hidden', currentFeatured.type !== 'lazer' || propertyAmenities.length === 0);
+
     document.getElementById('featured-owner-name').textContent = currentFeatured.ownerName;
     document.getElementById('featured-owner-phone').textContent = currentFeatured.ownerPhone;
     
@@ -855,7 +874,7 @@
       card.className = 'w-[260px] xs:w-[285px] sm:w-[340px] shrink-0 bg-cardnavy/95 border border-cyan-900/50 hover:border-neon/70 rounded-2xl p-3 sm:p-4 shadow-xl transition-all duration-300 flex flex-col justify-between group';
       
       card.innerHTML = `
-        <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-black/60 border border-slate-800 flex items-center justify-center">
+        <div class="property-photo-frame relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-black/60 flex items-center justify-center">
           <img src="${prop.photos[0]}" alt="${prop.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer" onclick="openLightbox('${prop.photos[0]}', '${prop.title}')">
           <span class="absolute top-2 left-2 text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-md" style="background:${cfg.bg}; color:${cfg.color}; border: 1px solid ${cfg.border}; backdrop-filter: blur(4px);">
             ${prop.typeLabel}
@@ -949,6 +968,10 @@
       if (currentFeatured?.id === propId) currentFeatured = propertyList[0] || null;
       renderPropertiesVitrine();
       updateFeaturedUI();
+      // Se a pessoa estiver na página do perfil, atualiza a lista e a contagem sem sair dela.
+      if (currentViewedOwner && !document.getElementById('view-profile').classList.contains('hidden')) {
+        showOwnerProfile(currentViewedOwner);
+      }
       showToast('Anúncio apagado', 'Seu imóvel foi removido da plataforma.', 'fa-trash');
     } catch (err) {
       console.error('Erro apagando anúncio:', err);
@@ -1011,6 +1034,15 @@
 
   function closeModal() {
     document.getElementById('announce-modal').classList.add('hidden');
+  }
+
+  function updateLeisureAmenities() {
+    const type = document.getElementById('prop-type')?.value;
+    const wrap = document.getElementById('leisure-amenities-wrap');
+    if (wrap) wrap.classList.toggle('hidden', type !== 'lazer');
+    if (type !== 'lazer') {
+      document.querySelectorAll('.prop-amenity:checked').forEach(el => { el.checked = false; });
+    }
   }
 
   function updatePriceLabelByType() {
@@ -1119,6 +1151,9 @@
     const kitchensVal = document.getElementById('prop-kitchens').value;
     const sunVal = document.getElementById('prop-sun').value;
     const descriptionVal = document.getElementById('prop-description').value.trim();
+    const amenitiesVal = type === 'lazer'
+      ? Array.from(document.querySelectorAll('.prop-amenity:checked')).map(el => el.value)
+      : [];
 
     const formattedPrice = `${currencySymbol} ${priceVal}`;
     
@@ -1146,6 +1181,7 @@
       price: formattedPrice,
       meters: metersVal || 'Não informado',
       description: descriptionVal,
+      amenities: amenitiesVal,
       address: address,
       houseNumber: houseNumber,
       reference: reference,
