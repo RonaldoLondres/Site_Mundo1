@@ -1041,52 +1041,48 @@
     const isLeisure = type === 'lazer';
     const section = document.getElementById('leisure-amenities-section');
     const wrap = document.getElementById('leisure-amenities-wrap');
-    if (section) section.style.display = isLeisure ? 'block' : 'none';
-    if (wrap) {
-      wrap.classList.remove('hidden');
-      wrap.style.display = 'block';
-    }
 
-    // Área de lazer usa um formulário próprio; os campos residenciais continuam
-    // intactos para venda e aluguel.
+    // As comodidades extras aparecem somente para Área de Lazer.
+    if (section) section.style.display = isLeisure ? 'block' : 'none';
+    if (wrap) wrap.style.display = isLeisure ? 'block' : 'none';
+
+    // Todos os tipos mantêm os mesmos campos do imóvel: lote, quartos, salas,
+    // cozinhas, banheiros e posição solar. Lazer apenas ganha comodidades extras.
     ['prop-lot-field','prop-rooms-field','prop-livingrooms-field',
      'prop-kitchens-field','prop-baths-field','prop-sun-field']
       .forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.classList.toggle('hidden', isLeisure);
-          el.style.display = isLeisure ? 'none' : '';
+          el.classList.remove('hidden');
+          el.style.display = '';
         }
       });
 
     const meters = document.getElementById('prop-meters');
     const lotOptional = document.getElementById('prop-lot-optional');
     const lotMark = document.getElementById('lot-required-mark');
-    if (meters) {
-      meters.required = !isLeisure && !(lotOptional && lotOptional.checked);
-      meters.disabled = isLeisure || !!(lotOptional && lotOptional.checked);
-      if (isLeisure) meters.value = '';
-      if (!isLeisure) meters.disabled = false;
-    }
     if (lotOptional) {
-      lotOptional.checked = isLeisure;
-      lotOptional.disabled = isLeisure;
+      lotOptional.disabled = !isLeisure;
+      if (!isLeisure) lotOptional.checked = false;
     }
-    if (lotMark) lotMark.classList.toggle('hidden', isLeisure);
+    if (meters) {
+      meters.disabled = !!(isLeisure && lotOptional?.checked);
+      meters.required = !meters.disabled;
+      if (meters.disabled) meters.value = '';
+    }
+    if (lotMark) lotMark.classList.toggle('hidden', !!(isLeisure && lotOptional?.checked));
 
-    // Campos ocultos de imóvel residencial não podem bloquear a publicação de lazer.
     ['prop-rooms','prop-livingrooms','prop-kitchens','prop-baths'].forEach(id => {
       const field = document.getElementById(id);
-      if (field) field.required = !isLeisure;
+      if (field) field.required = true;
     });
-
     const descLabel = document.getElementById('prop-description-label');
     const desc = document.getElementById('prop-description');
     if (descLabel) descLabel.textContent = isLeisure
-      ? 'Descrição da área de lazer'
+      ? 'Descrição da área de lazer e do imóvel'
       : 'Informações da casa mais detalhadas';
     if (desc) desc.placeholder = isLeisure
-      ? 'Descreva a área de lazer, capacidade de pessoas, regras, horários e diferenciais...'
+      ? 'Descreva a área de lazer, quartos, banheiros, cozinha, capacidade, regras e diferenciais...'
       : 'Escreva aqui detalhes, diferenciais e outras informações do imóvel...';
 
     if (!isLeisure) {
@@ -1127,10 +1123,10 @@
       const lotOptional = document.getElementById('prop-lot-optional').checked;
 
       const isLeisure = type === 'lazer';
-      if (!type || !price || (!isLeisure && !meters && !lotOptional) ||
-          (!isLeisure && (rooms === '' || livingRooms === '' || baths === '' || kitchens === '' || !sun))) {
+      if (!type || !price || (!meters && !(isLeisure && lotOptional)) ||
+          rooms === '' || livingRooms === '' || baths === '' || kitchens === '' || !sun) {
         showToast('Campos Obrigatórios', isLeisure
-          ? 'Selecione a finalidade e informe o valor da diária.'
+          ? 'Informe o valor da diária, os quartos, salas, cozinhas, banheiros e a posição solar. O lote pode ficar sem preenchimento se marcar a opção correspondente.'
           : 'Informe o valor, o lote, a posição solar e selecione a quantidade de cada cômodo.',
           'fa-triangle-exclamation');
         return;
@@ -1202,16 +1198,16 @@
     const isLeisure = selectedType === 'lazer';
     const lotOptional = document.getElementById('prop-lot-optional')?.checked;
     const meters = document.getElementById('prop-meters')?.value?.trim();
-    if (!isLeisure && !meters && !lotOptional) {
-      showToast('Campo obrigatório', 'Informe a metragem do imóvel.', 'fa-triangle-exclamation');
+    if (!meters && !(isLeisure && lotOptional)) {
+      showToast('Campo obrigatório', 'Informe a metragem do imóvel' + (isLeisure ? ' ou marque a opção para não informar o tamanho do lote.' : '.') , 'fa-triangle-exclamation');
       document.getElementById('prop-meters')?.focus();
       return;
     }
-    if (!isLeisure && !document.getElementById('prop-sun')?.value) {
+    if (!document.getElementById('prop-sun')?.value) {
       showToast('Campo obrigatório', 'Selecione a posição solar.', 'fa-triangle-exclamation');
       return;
     }
-    const roomFields = isLeisure ? [] : [
+    const roomFields = [
       ['prop-rooms', 'quartos'],
       ['prop-livingrooms', 'salas'],
       ['prop-baths', 'banheiros'],
