@@ -1038,9 +1038,50 @@
 
   function updateLeisureAmenities() {
     const type = document.getElementById('prop-type')?.value;
+    const isLeisure = type === 'lazer';
     const wrap = document.getElementById('leisure-amenities-wrap');
-    if (wrap) wrap.classList.toggle('hidden', type !== 'lazer');
-    if (type !== 'lazer') {
+    if (wrap) wrap.classList.toggle('hidden', !isLeisure);
+
+    // Área de lazer usa um formulário próprio; os campos residenciais continuam
+    // intactos para venda e aluguel.
+    ['prop-lot-field','prop-rooms-field','prop-livingrooms-field',
+     'prop-kitchens-field','prop-baths-field','prop-sun-field']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', isLeisure);
+      });
+
+    const meters = document.getElementById('prop-meters');
+    const lotOptional = document.getElementById('prop-lot-optional');
+    const lotMark = document.getElementById('lot-required-mark');
+    if (meters) {
+      meters.required = !isLeisure && !(lotOptional && lotOptional.checked);
+      meters.disabled = isLeisure || !!(lotOptional && lotOptional.checked);
+      if (isLeisure) meters.value = '';
+      if (!isLeisure) meters.disabled = false;
+    }
+    if (lotOptional) {
+      lotOptional.checked = isLeisure;
+      lotOptional.disabled = isLeisure;
+    }
+    if (lotMark) lotMark.classList.toggle('hidden', isLeisure);
+
+    // Campos ocultos de imóvel residencial não podem bloquear a publicação de lazer.
+    ['prop-rooms','prop-livingrooms','prop-kitchens','prop-baths'].forEach(id => {
+      const field = document.getElementById(id);
+      if (field) field.required = !isLeisure;
+    });
+
+    const descLabel = document.getElementById('prop-description-label');
+    const desc = document.getElementById('prop-description');
+    if (descLabel) descLabel.textContent = isLeisure
+      ? 'Descrição da área de lazer'
+      : 'Informações da casa mais detalhadas';
+    if (desc) desc.placeholder = isLeisure
+      ? 'Descreva a área de lazer, capacidade de pessoas, regras, horários e diferenciais...'
+      : 'Escreva aqui detalhes, diferenciais e outras informações do imóvel...';
+
+    if (!isLeisure) {
       document.querySelectorAll('.prop-amenity:checked').forEach(el => { el.checked = false; });
     }
   }
@@ -1051,6 +1092,7 @@
     if (type === 'aluguel') label.innerHTML = 'Valor Mensal <span class="text-neon">*</span>';
     else if (type === 'lazer') label.innerHTML = 'Valor Diária <span class="text-neon">*</span>';
     else label.innerHTML = 'Valor de Venda <span class="text-neon">*</span>';
+    updateLeisureAmenities();
   }
 
   function goToStep(step) {
@@ -1076,8 +1118,13 @@
       const sun = document.getElementById('prop-sun').value;
       const lotOptional = document.getElementById('prop-lot-optional').checked;
 
-      if (!type || !price || (!meters && !(type === 'lazer' && lotOptional)) || rooms === '' || livingRooms === '' || baths === '' || kitchens === '' || !sun) {
-        showToast('Campos Obrigatórios', 'Selecione a finalidade, a posição solar, informe o valor e selecione a quantidade de cada cômodo. O lote pode ficar vazio apenas em imóvel de lazer com a opção marcada.', 'fa-triangle-exclamation');
+      const isLeisure = type === 'lazer';
+      if (!type || !price || (!isLeisure && !meters && !lotOptional) ||
+          (!isLeisure && (rooms === '' || livingRooms === '' || baths === '' || kitchens === '' || !sun))) {
+        showToast('Campos Obrigatórios', isLeisure
+          ? 'Selecione a finalidade e informe o valor da diária.'
+          : 'Informe o valor, o lote, a posição solar e selecione a quantidade de cada cômodo.',
+          'fa-triangle-exclamation');
         return;
       }
     }
@@ -1133,8 +1180,7 @@
       ['prop-address', 'Informe o endereço do imóvel.'],
       ['prop-number', 'Informe o número do imóvel.'],
       ['prop-type', 'Selecione a finalidade do anúncio.'],
-      ['prop-price', 'Informe o valor do anúncio.'],
-      ['prop-sun', 'Selecione a posição solar.']
+      ['prop-price', 'Informe o valor do anúncio.']
     ];
     for (const [fieldId, message] of requiredFields) {
       const field = document.getElementById(fieldId);
@@ -1145,14 +1191,19 @@
       }
     }
     const selectedType = document.getElementById('prop-type').value;
+    const isLeisure = selectedType === 'lazer';
     const lotOptional = document.getElementById('prop-lot-optional')?.checked;
     const meters = document.getElementById('prop-meters')?.value?.trim();
-    if (!meters && !(selectedType === 'lazer' && lotOptional)) {
-      showToast('Campo obrigatório', 'Informe a metragem do imóvel ou marque a opção de lote não informado, quando aplicável.', 'fa-triangle-exclamation');
+    if (!isLeisure && !meters && !lotOptional) {
+      showToast('Campo obrigatório', 'Informe a metragem do imóvel.', 'fa-triangle-exclamation');
       document.getElementById('prop-meters')?.focus();
       return;
     }
-    const roomFields = [
+    if (!isLeisure && !document.getElementById('prop-sun')?.value) {
+      showToast('Campo obrigatório', 'Selecione a posição solar.', 'fa-triangle-exclamation');
+      return;
+    }
+    const roomFields = isLeisure ? [] : [
       ['prop-rooms', 'quartos'],
       ['prop-livingrooms', 'salas'],
       ['prop-baths', 'banheiros'],
@@ -1284,6 +1335,7 @@
 
   window.deleteProperty = deleteProperty;
   window.updateLotOptions = updateLotOptions;
+  window.updateLeisureAmenities = updateLeisureAmenities;
   window.checkEmailVerification = checkEmailVerification;
   window.resendEmailVerification = resendEmailVerification;
   window.toggleAuthMode = toggleAuthMode;
@@ -1340,6 +1392,6 @@
 
   // Init page; Firebase restores the session and loads cloud content.
   window.addEventListener('DOMContentLoaded', () => {
-    populateRoomSelectors(); updateLotOptions(); updateAuthUI(); updateFeaturedUI(); renderPropertiesVitrine();
+    populateRoomSelectors(); updateLotOptions(); updateLeisureAmenities(); updateAuthUI(); updateFeaturedUI(); renderPropertiesVitrine();
     if (window.firebaseBridgeReady) window.firebaseBridgeReady.then(() => window.firebaseBridge.startAuthListener(applyFirebaseUser)).catch(err => { console.error('Firebase não iniciou:', err); showToast('Firebase', 'Não foi possível iniciar o Firebase. Confira a configuração e a hospedagem.', 'fa-triangle-exclamation'); });
   });

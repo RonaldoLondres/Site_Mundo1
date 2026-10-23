@@ -615,7 +615,7 @@
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
 <div>
 <label class="block text-xs font-semibold text-slate-300 mb-1">Finalidade <span class="text-neon">*</span></label>
-<select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-type" onchange="updatePriceLabelByType(); updateLotOptions()" required>
+<select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-type" onchange="updatePriceLabelByType(); updateLotOptions(); updateLeisureAmenities()" required>
 <option value="" selected disabled>Selecione a finalidade</option>
 <option value="aluguel">Aluguel (Azul)</option>
 <option value="venda">Venda (Verde Neon)</option>
@@ -639,29 +639,29 @@
 </div>
 <!-- Lote e cômodos -->
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-<div class="col-span-2">
+<div class="col-span-2" id="prop-lot-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Lote <span class="text-neon" id="lot-required-mark">*</span></label>
 <input class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-meters" placeholder="Ex: 10x20" required />
 <label class="flex items-center gap-2 mt-2 text-[11px] text-slate-300"><input id="prop-lot-optional" type="checkbox" class="accent-yellow-400" onchange="updateLotOptions()"/> Imóvel de lazer: não informar o tamanho do lote</label>
 </div>
-<div>
+<div id="prop-rooms-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Quartos <span class="text-neon">*</span></label>
 <select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-rooms" required><option value="" selected disabled>Selecione</option></select>
 </div>
-<div>
+<div id="prop-livingrooms-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Salas <span class="text-neon">*</span></label>
 <select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-livingrooms" required><option value="" selected disabled>Selecione</option></select>
 </div>
-<div>
+<div id="prop-kitchens-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Cozinhas <span class="text-neon">*</span></label>
 <select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-kitchens" required><option value="" selected disabled>Selecione</option></select>
 </div>
-<div>
+<div id="prop-baths-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Banheiros <span class="text-neon">*</span></label>
 <select class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[42px]" id="prop-baths" required><option value="" selected disabled>Selecione</option></select>
 </div>
 <!-- POSIÇÃO SOLAR: 2 OPÇÕES STRICT -->
-<div>
+<div id="prop-sun-field">
 <label class="block text-xs font-semibold text-slate-300 mb-1">Posição Solar <span class="text-neon">*</span></label>
 <div class="grid grid-cols-2 gap-1.5">
 <button class="sun-choice-btn py-2 px-1.5 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-400 text-[11px] font-semibold flex items-center justify-center gap-1 transition min-h-[42px]" id="sun-btn-sol" onclick="selectSunPosition('Lado do Sol')" type="button">
@@ -674,7 +674,7 @@
 <input id="prop-sun" type="hidden" value=""/>
 </div>
 <div class="sm:col-span-3">
-<label class="block text-xs font-semibold text-slate-300 mb-1">Informações da casa mais detalhadas</label>
+<label class="block text-xs font-semibold text-slate-300 mb-1" id="prop-description-label">Informações da casa mais detalhadas</label>
 <textarea class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-neon min-h-[100px]" id="prop-description" placeholder="Escreva aqui detalhes, diferenciais e outras informações do imóvel..."></textarea>
 </div>
 <div id="leisure-amenities-wrap" class="hidden sm:col-span-3 rounded-2xl border border-yellow-500/30 bg-slate-900/50 p-3 space-y-3">
